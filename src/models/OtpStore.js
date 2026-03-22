@@ -5,7 +5,6 @@ const otpStoreSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: true,
-      index: true,
     },
     otp: {
       type: String,
@@ -19,6 +18,7 @@ const otpStoreSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-otpStoreSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL index - MongoDB auto-deletes expired docs
+otpStoreSchema.index({ phone: 1 });
+otpStoreSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL index - auto-delete expired
 
 module.exports = mongoose.model('OtpStore', otpStoreSchema);

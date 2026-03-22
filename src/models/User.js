@@ -36,11 +36,13 @@ const userSchema = new mongoose.Schema(
     isProfileComplete: {
       type: Boolean,
       default: false,
+      required: true,
     },
   },
   { timestamps: true }
 );
 
-userSchema.index({ phone: 1 });
+// phone unique index comes from field `unique: true` above — do not add schema.index({ phone }) again
+userSchema.index({ referredBy: 1 });
 
 module.exports = mongoose.model('User', userSchema);

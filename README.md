@@ -26,16 +26,26 @@ Node.js (Express) backend for the **Sahaya** React Native app — auth (OTP), us
    - Set `MONGODB_URI` (e.g. `mongodb://localhost:27017/sahaya`)
    - Set `JWT_SECRET` for production
 
-4. **Seed services (optional)**
+4. **Create MongoDB collections and indexes**
    ```bash
-   node src/scripts/seedServices.js
+   npm run init-db
+   ```
+   (Creates `users`, `services`, `bookings`, `otpstores` and their indexes. Ensure MongoDB is running.)
+
+5. **Seed services (optional)**
+   ```bash
+   npm run seed-services
    ```
 
-5. **Run**
+6. **Run**
    ```bash
    npm run dev
    ```
    Server runs at `http://localhost:4000`. API base: `http://localhost:4000/api`.
+
+7. **Insert data (development)**  
+   With `NODE_ENV=development`, the **Dev DB API** is available under `/api/dev` — insert users, services, bookings, and transactions via HTTP (see **[docs/DEV_DB_API.md](docs/DEV_DB_API.md)**).  
+   Quick check: `curl http://localhost:4000/api/dev/summary`
 
 ## Folder structure
 
@@ -45,12 +55,13 @@ sahaya-backend/
 │   ├── config/          # app config, database connection
 │   ├── controllers/     # auth, users, services, bookings
 │   ├── middleware/      # auth (JWT), error handler
-│   ├── models/          # User, Service, Booking, OtpStore
-│   ├── routes/          # API route definitions
+│   ├── models/          # User, Service, Booking, OtpStore, Transaction
+│   ├── routes/          # API routes (+ dev DB tools in development)
 │   ├── services/        # OTP generation & verification
-│   ├── scripts/         # seed scripts (e.g. services)
+│   ├── scripts/         # initDb, seedServices
 │   ├── utils/           # JWT helpers
 │   └── index.js         # app entry
+├── docs/                # e.g. DEV_DB_API.md, DATABASE_ARCHITECTURE.md
 ├── .env.example
 ├── package.json
 └── README.md
@@ -70,9 +81,32 @@ sahaya-backend/
 | POST | `/api/bookings` | Yes | Create booking (serviceId, type, scheduledAt?, address?) |
 | GET | `/api/bookings` | Yes | List current user's bookings |
 
+**Development — Dev DB insert API** (`NODE_ENV=development` or `ENABLE_DEV_DB_TOOLS=true`): see [docs/DEV_DB_API.md](docs/DEV_DB_API.md) for `GET/POST /api/dev/*` (summary, services, users, bookings, transactions). Optional header `X-Dev-Db-Key` if `DEV_DB_KEY` is set in `.env`.
+
 **Auth header:** `Authorization: Bearer <token>`
 
 In **development**, `POST /api/auth/send-otp` response includes `otp` so you can verify without SMS.
+
+## Troubleshooting
+
+### `connect ECONNREFUSED 127.0.0.1:27017`
+
+MongoDB is not running or not listening on the default port. Do one of the following:
+
+- **Local MongoDB (macOS with Homebrew):**  
+  `brew tap mongodb/brew && brew install mongodb-community@8.0 && brew services start mongodb-community@8.0`  
+  (or start **MongoDB Compass** / Docker container that exposes port `27017`.)
+- **MongoDB Atlas:** Put your connection string in `.env` as `MONGODB_URI=...` (no local server needed).
+
+Then run `npm run init-db` again.
+
+### `npm seed-sample-data` → Unknown command
+
+Use the **run** form for package scripts:
+
+```bash
+npm run seed-sample-data
+```
 
 ## Connecting the React Native app (sahaya-mobile)
 

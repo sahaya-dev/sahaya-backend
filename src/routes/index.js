@@ -1,4 +1,5 @@
 const express = require('express');
+const config = require('../config');
 const authRoutes = require('./auth');
 const userRoutes = require('./users');
 const serviceRoutes = require('./services');
@@ -10,6 +11,10 @@ router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/services', serviceRoutes);
 router.use('/bookings', bookingRoutes);
+
+if (config.devDbToolsEnabled) {
+  router.use('/dev', require('./dev'));
+}
 
 router.get('/health', (req, res) => {
   res.json({ success: true, message: 'Sahaya API is running' });
